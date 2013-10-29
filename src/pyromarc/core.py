@@ -1,60 +1,32 @@
 import re
-
-def from_iso2709(raw):
-    """
-    """
-    head, *fields = raw[:-1].split("\x1e")
-
-    if not fields:
-        raise Exception('No fields')
-
-    head_length = len(head)
-    if head_length < 24 or head_length % 12 != 0 or not head.isdigit():
-        raise Exception('Bad format for head')
-
-    leader, head = head[:24], head[24:]
-    tags = chunkify(head, 3, slicing=12)
-    return leader, zip(tags, map(_extract_subs, fields))
+from .utils import chunkify
+from . import END_OF_FIELD, END_OF_SUBFIELD
 
 
-def _extract_subs(field):
-    """
-    """
-    chunks = re.split("\x1f(.)", field)
-    if len(chunks) == 1:
-        return (chunks, )
-    indicators = list(chunks.pop(0))
-    subfields = chunkify(chunks, 2)
-    return subfields, indicators
-
-
-def chunkify(iterable, per_chunk, slicing=None):
-    """
-    """
-    slicing = slicing if slicing is not None else per_chunk
-    for index in range(0, len(iterable), slicing):
-        yield iterable[index:index + per_chunk]
-
-
-class Iso2709(object):
+class Iso2709(list):
     """
     """
 
-    def __init__(self, raw):
+    def __init__(self, raw, end_of_field=END_OF_FIELD):
         """
         """
-        head, *fields = raw[:-1].split("\x1e")
+        list.__init__(self)
+        head, *fields = raw[:-1].split(end_of_field)
+
+        if not head:
+            raise Exception('No record')
 
         if not fields:
             raise Exception('No fields')
 
         head_length = len(head)
-        if head_length < 24 or head_length % 12 != 0 or not head.isdigit():
-            raise Exception('Bad format for head')
+        if head_length < 24 or head_length % 12 != 0:
+            raise Exception('Bad format for head: %s' % head)
 
-        self.leader = head[:24]
-        self.fields = [Field(name, value) for name, value in 
-                zip(chunkify(head[24:], 3, slicing=12), fields)]
+        leader = head[:24].decode('utf-8')
+        self.append(leader)
+        self.extend([Field(name, value) for name, value in 
+                zip(chunkify(head[24:], 3, slicing=12), fields)])
 
 
     def __repr__(self):
@@ -62,28 +34,50 @@ class Iso2709(object):
 
     @property
     def tags(self):
-        return [field.name for field in self.fields]
+        return [field[0] for field in self[1:]]
+
+    @property
+    def leader(self):
+        return self[0]
+
+    @property
+    def fields(self):
+        return self[1:]
 
     def field(self, tag):
-        return self.fields[self.fields.index(tag)]
+        return self[self.index(tag)]
 
 
-class Field(object):
+class Field(list):
     """
     """
 
-    def __init__(self, name, value):
+    def __init__(self, name, value, end_of_subfield=END_OF_SUBFIELD):
         """
         """
-        self.name = name
-        chunks = re.split("\x1f(.)", value)
+        list.__init__(self)
+        self.append(name.decode('utf-8'))
+        chunks = re.split(b'\x1f(.)', value)
         if len(chunks) == 1:
-            self.value = value
-            self.indicators = []
+            self.append(value)
+            self.append('')
         else:
-            self.indicators = list(chunks.pop(0))
-            self.value = [Field(name, value) for name, value in
-                    chunkify(chunks, 2)]
+            indicators = chunks.pop(0).decode('utf-8')
+            self.extend([Field(name, value, end_of_subfield) for name, value
+                in chunkify(chunks, 2)])
+            self.append(indicators)
+
+    @property
+    def name(self):
+        return self[0]
+
+    @property
+    def value(self):
+        return self[1]
+
+    @property
+    def indicators(self):
+        return self[2]
 
     def __eq__(self, field):
         if isinstance(field, str):
@@ -105,3 +99,8 @@ class Field(object):
         except IndexError:
             return None
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
