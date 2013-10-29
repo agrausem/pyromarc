@@ -1,7 +1,9 @@
 import unittest
 import os
 import json
-from pyromarc.core import Iso2709
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+from pyromarc.core import Iso2709, Iso2709Reader
 
 
 class TestIso2709(unittest.TestCase):
@@ -14,9 +16,20 @@ class TestIso2709(unittest.TestCase):
             self.data = example.read().split(b'\x1d')
 
 
+    def test_read(self):
+        filepath = os.path.join(
+            os.path.dirname(__file__), 'data', 'example.iso2709')
+        records = Iso2709Reader(filepath)
+        self.assertEqual(len(list(records)), 1190)
+
+
     def test_parsing(self):
         for record_data in self.data:
             record = Iso2709(record_data)
             self.assertIn('200', record.tags)
             print(record_data)
             json.dumps(record)
+
+
+if __name__ == '__main__':
+    unittest.main()
