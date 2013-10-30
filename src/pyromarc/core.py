@@ -1,9 +1,10 @@
 import re
 from .utils import chunkify
 from . import END_OF_FIELD, END_OF_SUBFIELD
+import smc.bibencodings
 
 
-class Iso2709(list):
+class MIR(list):
     """
     """
 
@@ -28,9 +29,6 @@ class Iso2709(list):
         self.extend([Field(name, value) for name, value in 
                 zip(chunkify(head[24:], 3, slicing=12), fields)])
 
-
-    def __repr__(self):
-        return '<Iso2709: %s>' % self.leader
 
     @property
     def tags(self):
@@ -59,11 +57,11 @@ class Field(list):
         self.append(name.decode('utf-8'))
         chunks = re.split(b'\x1f(.)', value)
         if len(chunks) == 1:
-            self.append(value)
+            self.append(value.decode("iso5426"))
             self.append('')
         else:
             indicators = chunks.pop(0).decode('utf-8')
-            self.extend([Field(name, value, end_of_subfield) for name, value
+            self.append([Field(name, value, end_of_subfield) for name, value
                 in chunkify(chunks, 2)])
             self.append(indicators)
 
@@ -100,7 +98,4 @@ class Field(list):
             return None
 
     def __str__(self):
-        return self.name
-
-    def __repr__(self):
         return self.name

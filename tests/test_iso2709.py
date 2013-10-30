@@ -1,7 +1,8 @@
 import unittest
 import os
 import json
-from pyromarc.core import Iso2709
+from pyromarc.core import MIR
+import pprint
 
 
 class TestIso2709(unittest.TestCase):
@@ -15,8 +16,12 @@ class TestIso2709(unittest.TestCase):
 
 
     def test_parsing(self):
-        for record_data in self.data:
-            record = Iso2709(record_data)
+        for index, record_data in enumerate(self.data):
+            try:
+                record = MIR(record_data)
+            except:
+                print('Index : %s\n' % index)
+                print(record_data)
+                raise
             self.assertIn('200', record.tags)
-            print(record_data)
-            json.dumps(record)
+            pprint.pprint(record)
