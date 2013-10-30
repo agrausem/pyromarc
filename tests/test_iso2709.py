@@ -2,7 +2,7 @@ import unittest
 import os
 import json
 from pyromarc.core import MIR
-import pprint
+from pyromarc.core import Iso2709Reader
 
 
 class TestIso2709(unittest.TestCase):
@@ -15,6 +15,13 @@ class TestIso2709(unittest.TestCase):
             self.data = example.read().split(b'\x1d')
 
 
+    def test_read(self):
+        filepath = os.path.join(
+            os.path.dirname(__file__), 'data', 'example.iso2709')
+        records = Iso2709Reader(filepath)
+        self.assertEqual(len(list(records)), 1190)
+
+
     def test_parsing(self):
         for index, record_data in enumerate(self.data):
             try:
@@ -24,4 +31,5 @@ class TestIso2709(unittest.TestCase):
                 print(record_data)
                 raise
             self.assertIn('200', record.tags)
-            pprint.pprint(record)
+            print(record_data)
+            json.dumps(record)

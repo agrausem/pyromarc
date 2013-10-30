@@ -1,7 +1,28 @@
 import re
 from .utils import chunkify
-from . import END_OF_FIELD, END_OF_SUBFIELD
 import smc.bibencodings
+from . import END_OF_RECORD, END_OF_FIELD, END_OF_SUBFIELD
+
+
+class Iso2709Reader(object):
+    def __init__(self, filepath, **kwargs):
+        self.filepath = filepath
+        self.chunk_size = kwargs.get('chunk_size', 1024)
+
+    def __iter__(self):
+        with open(self.filepath, 'rb') as fhandler:
+            record = b''
+
+            cur_bytes = fhandler.read(self.chunk_size)
+            while cur_bytes:
+                if END_OF_RECORD in cur_bytes:
+                    cur_records = cur_bytes.split(END_OF_RECORD)
+                    record += cur_records.pop(0)
+                    yield record
+                    for r in cur_records[:-1]:
+                        yield r
+                    record = cur_records[-1] if cur_records else b''
+                cur_bytes = fhandler.read(self.chunk_size)
 
 
 class MIR(list):
@@ -26,7 +47,7 @@ class MIR(list):
 
         leader = head[:24].decode('utf-8')
         self.append(leader)
-        self.extend([Field(name, value) for name, value in 
+        self.extend([Field(name, value) for name, value in
                 zip(chunkify(head[24:], 3, slicing=12), fields)])
 
 
