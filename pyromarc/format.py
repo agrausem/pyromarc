@@ -53,16 +53,14 @@ class ISO2709(MARCSerializer):
         for name, value in zip(chunkify(head[24:], 3, slicing=12), raw_fields):
             chunks = self.subfield_parser.split(value)
             if len(chunks) == 1:
-                fields.append(Field(name, value=value))
+                field = Field(name, value=value)
             else:
-                subfields = []
                 indicators = chunks.pop(0)
-                for sub_name, sub_value in chunkify(chunks, 2):
-                    subfields.append(SubField(sub_name, sub_value))
-                fields.append(Field(name,
-                                    indicators=indicators,
-                                    subfields=subfields
-                                    ))
+                subfields = [SubField(name, value) for name, value in
+                        chunkify(chunks, 2)]
+                field = Field(name, indicators=indicators, subfields=subfields)
+            fields.append(field)
+
         return leader, fields
         
 
