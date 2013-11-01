@@ -21,28 +21,24 @@ class ISO2709(MARCSerializer):
 
     def __init__(self, end_of_record=b'\x1d', end_of_field=b'\x1e',
             end_of_subfield=b'\x1f'):
-        self.end_of_record = end_of_record
-        self.end_of_field = end_of_field
-        self.end_of_subfield = end_of_subfield
-        self.subfield_parser = re.compile(self.end_of_subfield + b'(.)')
+        self.end_of_record = end_of_record.decode('mab2')
+        self.end_of_field = end_of_field.decode('mab2')
+        self.end_of_subfield = end_of_subfield.decode('mab2')
+        self.subfield_parser = re.compile(self.end_of_subfield + '(.)')
 
     def load(self, filepath, chunk_size=1024):
         with open(filepath, 'rb') as file_handler:
-            chunk = file_handler.read(chunk_size)
+            chunk = file_handler.read(chunk_size).decode('mab2')
             while chunk:
                 if self.end_of_record in chunk:
                     record, _, chunk = chunk.partition(self.end_of_record)
                     leader, fields = self._parse(record)
                     yield MIR(leader, fields)
                     if not chunk:
-                        chunk = file_handler.read(chunk_size)
+                        chunk = file_handler.read(chunk_size).decode('mab2')
                 else:
-                    chunk += file_handler.read(chunk_size)
+                    chunk += file_handler.read(chunk_size).decode('mab2')
 
-    def _decode(self, *strings):
-        if len(strings) == 1:
-            return strings[0].decode('mab2')
-        return [string.decode('mab2') for string in strings]
 
     def _parse(self, record):
         head, *raw_fields = record[:-1].split(self.end_of_field)
@@ -51,21 +47,18 @@ class ISO2709(MARCSerializer):
         if head_length < 24 or head_length % 12 != 0:
             raise BadHeaderException(head)
 
-        leader = self._decode(head[:24])
+        leader = head[:24]
 
         fields = []
         for name, value in zip(chunkify(head[24:], 3, slicing=12), raw_fields):
             chunks = self.subfield_parser.split(value)
             if len(chunks) == 1:
-                name, value = self._decode(name, value)
                 fields.append(Field(name, value=value))
             else:
                 subfields = []
-                indicators = self._decode(chunks.pop(0))
+                indicators = chunks.pop(0)
                 for sub_name, sub_value in chunkify(chunks, 2):
-                    sub_name, sub_value = self._decode(sub_name, sub_value)
                     subfields.append(SubField(sub_name, sub_value))
-                name = self._decode(name)
                 fields.append(Field(name,
                                     indicators=indicators,
                                     subfields=subfields
