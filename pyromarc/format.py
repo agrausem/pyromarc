@@ -87,7 +87,7 @@ class BadHeaderException(Exception):
         return '{} is not a valid header'.format(self.header)
 
 
-def UnrecognizedFormat(Exception):
+class UnrecognizedFormat(Exception):
 
     def __init__(self, serializer, *args, **kwargs):
         super(UnrecognizedFormat, self).__init__(*args, **kwargs)
