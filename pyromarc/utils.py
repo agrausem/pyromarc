@@ -10,6 +10,12 @@ def chunkify(iterable, per_chunk, slicing=None):
     """
     Explodes an iterable into chunks
 
+    :param iterable: an iterable
+    :param per_chunk: length of the wanted chunks
+    :type per_chunk: integer
+    :param slicing: slicing for iterate an iterable
+    :type slicing: integer
+
     >>> list(chunkify(range(0, 10), per_chunk=3))
     [range(0, 3), range(3, 6), range(6, 9), range(9, 10)]
     >>> list(chunkify(range(0, 10), per_chunk=3, slicing=4))
