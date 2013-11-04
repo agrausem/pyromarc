@@ -1,17 +1,18 @@
 """
 """
 
-from . import format as format_
+from pyromarc import format as format_
 
 
-def reader(filepath, serializer, chunk_size=1024, **serializer_kwargs):
+def reader(buffer, serializer, chunk_size=1024, **serializer_kwargs):
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    for element in serializer.load(filepath, chunk_size=chunk_size):
+    for element in serializer.load(buffer, chunk_size=chunk_size):
         yield element
 
 
-def writer(filepath, mir):
-    pass
+def writer(buffer, mirs, serializer, **serializer_kwargs):
+    serializer = _get_serializer(serializer, **serializer_kwargs)
+    serializer.dump(buffer, mirs)
 
 
 def _get_serializer(serializer, **kwargs):
