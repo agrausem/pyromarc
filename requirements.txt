@@ -1,1 +1,2 @@
+msgpack-python
 -e hg+https://bitbucket.org/agrausem/smc.bibencodings#egg=smc
