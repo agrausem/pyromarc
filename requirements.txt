@@ -1,1 +1,1 @@
-smc.bibencodings==0.1
+-e hg+https://bitbucket.org/agrausem/smc.bibencodings#egg=smc
