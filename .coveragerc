@@ -1,0 +1,6 @@
+[run]
+source = 
+    pyromarc 
+
+[report]
+omit = */tests/*
