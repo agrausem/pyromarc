@@ -1,0 +1,12 @@
+language: python
+python:
+ - "3.2"
+ - "3.3"
+install:
+ - pip install -r requirements.txt --use-mirrors
+ - pip install -r requirements-test.txt --use-mirrors
+ - pip install -e .
+script: nosetest --config=nose.cfg
+after_success:
+ - pip install coveralls
+ - coveralls
