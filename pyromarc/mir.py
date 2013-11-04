@@ -56,7 +56,7 @@ class Field(BaseField):
     """
     """
 
-    def __init__(self, name, value='', indicators='', subfields=None):
+    def __init__(self, name, value='', indicators=None, subfields=None):
         """
         """
         super(Field, self).__init__(name)
@@ -64,7 +64,7 @@ class Field(BaseField):
             self.append(value)
         else:
             self.append(subfields)
-        self.append(indicators.split())
+        self.append(indicators or [])
 
     @property
     def value(self):
