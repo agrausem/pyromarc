@@ -2,6 +2,12 @@
 Pyromarc
 ========
 
+.. image:: https://secure.travis-ci.org/agrausem/pyromarc.png?branch=master
+    :target: https://travis-ci.org/agrausem/pyromarc
+
+.. image:: https://coveralls.io/repos/agrausem/pyromarc/badge.png?branch=master
+    :target: https://coveralls.io/r/agrausem/pyromarc?branch=master
+
 MARC::MIR est une spécification de représentation mémoire (sous la forme de
 tableau de tableaux) de données bibliographiques cataloguée en MARC. elle
 permet d'établir des ponts simples entre les différents outils exitants de
