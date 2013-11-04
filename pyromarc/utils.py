@@ -1,6 +1,19 @@
+"""
+pyromarc.utils
+~~~~~~~~~~~~~~
+
+Utility functions for the pyromarc library
+"""
+
 
 def chunkify(iterable, per_chunk, slicing=None):
     """
+    Explodes an iterable into chunks
+
+    >>> list(chunkify(range(0, 10), per_chunk=3))
+    [range(0, 3), range(3, 6), range(6, 9), range(9, 10)]
+    >>> list(chunkify(range(0, 10), per_chunk=3, slicing=4))
+    [range(0, 3), range(4, 7), range(8, 10)]
     """
     if slicing is None:
         slicing = per_chunk
