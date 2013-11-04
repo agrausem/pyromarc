@@ -84,11 +84,5 @@ class UnrecognizedFormat(Exception):
         super(UnrecognizedFormat, self).__init__(*args, **kwargs)
         self.serializer = repr(serializer)
 
-    def _format_available(self):
-        return [format_ for format_ in dir(__import__(__name__))
-                if issubclass(format_, MARCSerializer)]
-
     def __str__(self):
-        return '{} is not a valid format. Formats available are {} :\n'.format(
-                self.serializer,
-                '\n'.join(self_format_available()))
+        return '{} is not a valid format.'.format(self.serializer)
