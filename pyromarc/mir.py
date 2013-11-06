@@ -15,7 +15,7 @@ class MIR(list):
 
     @property
     def tags(self):
-        return [field.name for field in self.fields]
+        return (field.tag for field in self.fields)
 
     @property
     def leader(self):
@@ -33,22 +33,22 @@ class BaseField(list):
     """
     """
 
-    def __init__(self, name):
+    def __init__(self, tag):
         list.__init__(self)
-        self.append(name)
+        self.append(tag)
 
     @property
-    def name(self):
+    def tag(self):
         return self[0]
 
     def __str__(self):
-        return self.name
+        return self.tag
 
     def __eq__(self, field):
         if isinstance(field, str):
-            return self.name == field
+            return self.tag == field
         elif isinstance(field, self.__class__):
-            return field.name == self.name
+            return field.tag == self.tag
         return False
 
 
@@ -56,15 +56,16 @@ class Field(BaseField):
     """
     """
 
-    def __init__(self, name, value='', indicators=None, subfields=None):
+    def __init__(self, tag, value='', indicators=None, subfields=None):
         """
         """
-        super(Field, self).__init__(name)
+        super(Field, self).__init__(tag)
         if not subfields:
             self.append(value)
         else:
             self.append(subfields)
-        self.append(indicators or [])
+        if indicators:
+            self.append(indicators)
 
     @property
     def value(self):
@@ -74,7 +75,10 @@ class Field(BaseField):
 
     @property
     def indicators(self):
-        return self[2]
+        return self[2] if not self.is_control() else None
+
+    def is_control(self):
+        return not self.has_subfields() and len(self) == 2
 
     def has_subfields(self):
         return isinstance(self.value, list)
@@ -82,7 +86,7 @@ class Field(BaseField):
     @property
     def subfields(self):
         if self.has_subfields():
-            return [field.name for field in self.value]
+            return [field.tag for field in self.value]
         return None
 
     def subfield(self, tag):
@@ -96,6 +100,10 @@ class SubField(BaseField):
     """
     """
 
-    def __init__(self, name, value):
-        super(SubField, self).__init__(name)
+    def __init__(self, tag, value):
+        super(SubField, self).__init__(tag)
         self.append(value)
+
+    @property
+    def value(self):
+        return self[1]
