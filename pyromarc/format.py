@@ -53,7 +53,7 @@ class ISO2709(MARCSerializer):
             if len(chunks) == 1:
                 field = Field(name, value=value)
             else:
-                indicators = chunks.pop(0).split(' ')
+                indicators = list(chunks.pop(0))
                 subfields = [SubField(name, value) for name, value in
                         chunkify(chunks, 2)]
                 field = Field(name, indicators=indicators, subfields=subfields)
