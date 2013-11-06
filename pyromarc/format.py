@@ -20,23 +20,31 @@ class ISO2709(MARCSerializer):
     """
 
     def __init__(self, end_of_record=b'\x1d', end_of_field=b'\x1e',
-            end_of_subfield=b'\x1f'):
-        self.end_of_record = end_of_record.decode('mab2')
-        self.end_of_field = end_of_field.decode('mab2')
-        self.end_of_subfield = end_of_subfield.decode('mab2')
+            end_of_subfield=b'\x1f', chunk_size=1024, encoding='mab2'):
+        self.chunk_size = chunk_size
+        self.encoding = encoding
+        self.end_of_record = self._decode(end_of_record)
+        self.end_of_field = self._decode(end_of_field)
+        self.end_of_subfield = self._decode(end_of_subfield)
         self.subfield_parser = re.compile(self.end_of_subfield + '(.)')
 
-    def load(self, buffer, chunk_size=1024):
-        chunk = buffer.read(chunk_size).decode('mab2')
+    def _decode(self, value):
+        return value.decode(self.encoding)
+
+    def _read(self, buffer):
+        return self._decode(buffer.read(self.chunk_size))
+
+    def load(self, buffer):
+        chunk = self._read(buffer)
         while chunk:
             if self.end_of_record in chunk:
                 record, _, chunk = chunk.partition(self.end_of_record)
                 leader, fields = self._parse(record)
                 yield MIR(leader, fields)
                 if not chunk:
-                    chunk = buffer.read(chunk_size).decode('mab2')
+                    chunk = self._read(buffer)
             else:
-                chunk += buffer.read(chunk_size).decode('mab2')
+                chunk += self._read(buffer)
 
     def _parse(self, record):
         head, *raw_fields = record[:-1].split(self.end_of_field)

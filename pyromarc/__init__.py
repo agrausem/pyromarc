@@ -4,9 +4,9 @@
 from pyromarc import format as format_
 
 
-def reader(buffer, serializer, chunk_size=1024, **serializer_kwargs):
+def reader(buffer, serializer, **serializer_kwargs):
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    for element in serializer.load(buffer, chunk_size=chunk_size):
+    for element in serializer.load(buffer):
         yield element
 
 

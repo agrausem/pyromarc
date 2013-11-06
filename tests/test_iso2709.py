@@ -18,7 +18,7 @@ class TestIso2709(unittest.TestCase):
         with open(self.path, 'r+b') as example:
             data = example.read().split(b'\x1d')[:-1]
         with open(self.path, 'r+b') as buffer:
-            records = list(reader(buffer, 'ISO2709', chunk_size=1024))
+            records = list(reader(buffer, 'ISO2709'))
         self.assertEqual(len(list(records)), len(data))
 
 
@@ -30,7 +30,7 @@ class TestIso2709(unittest.TestCase):
 
     def test_msgpack(self):
         with open(self.path, 'r+b') as buffer:
-            records = list(reader(buffer, 'ISO2709', chunk_size=1024))[0:5]
+            records = list(reader(buffer, 'ISO2709'))[0:5]
 
         buf = BytesIO()
 
