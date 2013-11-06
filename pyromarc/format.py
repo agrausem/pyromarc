@@ -89,8 +89,7 @@ class MsgPack(MARCSerializer):
                     fields.append(Field(field[0], subfields=subfields,
                         indicators=field[2]))
                 else:
-                    fields.append(Field(field[0], value=field[1],
-                        indicators=field[2]))
+                    fields.append(Field(field[0], value=field[1]))
             yield MIR(record[0], fields)
 
 
