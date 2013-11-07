@@ -1,9 +1,9 @@
-import unittest
-import os
-from pyromarc import reader
-from pyromarc.format import ISO2709
-from itertools import islice
 from io import BytesIO
+from itertools import islice
+import os
+import unittest
+
+from pyromarc.format import ISO2709
 
 
 class TestIso2709(unittest.TestCase):

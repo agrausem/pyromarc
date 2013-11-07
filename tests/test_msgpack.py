@@ -1,19 +1,18 @@
+from io import BytesIO
+from itertools import islice
 import unittest
 import os
-from itertools import islice
-from io import BytesIO
+
 from pyromarc import reader
 from pyromarc.format import MsgPack
 
 
 class TestMsgPack(unittest.TestCase):
 
-    
     def setUp(self):
         path = 'data/example.iso2709'
         self.path = os.path.join(os.path.dirname(__file__), path)
         self.serializer = MsgPack()
-
 
     def test_symmetrical(self):
         take = lambda n, iterable: list(islice(iterable, n))
