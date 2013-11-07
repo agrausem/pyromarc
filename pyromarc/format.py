@@ -31,8 +31,14 @@ class ISO2709(MARCSerializer):
     def _decode(self, value):
         return value.decode(self.encoding)
 
+    def _encode(self, value):
+        return value.encode(self.encoding)
+
     def _read(self, buffer):
         return self._decode(buffer.read(self.chunk_size))
+
+    def _write(self, buffer, value):
+        buffer.write(self._encode(value))
 
     def load(self, buffer):
         chunk = self._read(buffer)
@@ -70,7 +76,24 @@ class ISO2709(MARCSerializer):
         return leader, fields
         
     def dump(self, buffer, mirs):
-        pass
+        field_format = lambda field: '{0.tag}{0.value}'.format(field)
+        for mir in mirs:
+            header = mir.leader
+            header += ''.join('{:.<12}'.format(field.tag) for field in
+                    mir.fields)
+            self._write(buffer, header)
+            self._write(buffer, self.end_of_field)
+            for field in mir.fields:
+                if field.is_control():
+                    self._write(buffer, field.value)
+                else:
+                    self._write(buffer, ''.join(field.indicators))
+                    self._write(buffer, self.end_of_subfield)
+                    subfield = self.end_of_subfield.join(
+                        field_format(subfield) for subfield in field.subfields)
+                    self._write(buffer, subfield)
+                self._write(buffer, self.end_of_field)
+            self._write(buffer, self.end_of_record)
 
 
 class MsgPack(MARCSerializer):

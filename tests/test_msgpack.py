@@ -12,19 +12,18 @@ class TestMsgPack(unittest.TestCase):
     def setUp(self):
         path = 'data/example.iso2709'
         self.path = os.path.join(os.path.dirname(__file__), path)
+        self.serializer = MsgPack()
 
 
-    def test_symetrical(self):
+    def test_symmetrical(self):
         take = lambda n, iterable: list(islice(iterable, n))
 
         with open(self.path, 'r+b') as buffer:
             records = take(5, reader(buffer, 'ISO2709'))
 
-        buf = BytesIO()
+        buffer = BytesIO()
+        self.serializer.dump(buffer, records)
 
-        serializer = MsgPack()
-        serializer.dump(buf, records)
-
-        buf.seek(0)
-        mirs = list(serializer.load(buf))
+        buffer.seek(0)
+        mirs = list(self.serializer.load(buffer))
         self.assertEqual(records, mirs)
