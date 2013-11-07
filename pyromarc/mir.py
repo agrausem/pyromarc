@@ -81,12 +81,12 @@ class Field(BaseField):
         return not self.has_subfields() and len(self) == 2
 
     def has_subfields(self):
-        return isinstance(self.value, list)
+        return isinstance(self[1], list)
 
     @property
     def subfields(self):
         if self.has_subfields():
-            return [field.tag for field in self.value]
+            return self[1]
         return None
 
     def subfield(self, tag):
