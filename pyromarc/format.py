@@ -79,8 +79,7 @@ class ISO2709(MARCSerializer):
         field_format = lambda field: '{0.tag}{0.value}'.format(field)
         for mir in mirs:
             header = mir.leader
-            header += ''.join('{:.<12}'.format(field.tag) for field in
-                    mir.fields)
+            header += ''.join('{:.<12}'.format(tag) for tag in mir.tags)
             self._write(buffer, header)
             self._write(buffer, self.end_of_field)
             for field in mir.fields:
