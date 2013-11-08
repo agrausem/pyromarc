@@ -17,8 +17,7 @@ class TestMsgPack(unittest.TestCase):
     def test_symmetrical(self):
         take = lambda n, iterable: list(islice(iterable, n))
 
-        with open(self.path, 'r+b') as buffer:
-            records = take(5, reader(buffer, 'ISO2709'))
+        records = take(5, reader(self.path, 'ISO2709'))
 
         buffer = BytesIO()
         self.serializer.dump(buffer, records)

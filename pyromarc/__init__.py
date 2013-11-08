@@ -4,15 +4,32 @@
 from pyromarc import format as format_
 
 
-def reader(buffer, serializer, **serializer_kwargs):
+def reader(filepath, serializer, **serializer_kwargs):
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    for element in serializer.load(buffer):
+    with open(filepath, serializer.read_mode) as fhandler:
+        for element in serializer.load(fhandler):
+            yield element
+
+
+def readerb(fhandler, serializer, **serializer_kwargs):
+    serializer = _get_serializer(serializer, **serializer_kwargs)
+    if serializer.read_mode == 'rb':
+        fhandler = fhandler.buffer
+    for element in serializer.load(fhandler):
         yield element
 
 
-def writer(buffer, mirs, serializer, **serializer_kwargs):
+def writer(filepath, mirs, serializer, **serializer_kwargs):
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    serializer.dump(buffer, mirs)
+    with open(filepath, serializer.write_mode) as fhandler:
+        serializer.dump(fhandler, mirs)
+
+
+def writerb(fhandler, mirs, serializer, **serializer_kwargs):
+    serializer = _get_serializer(serializer, **serializer_kwargs)
+    if serializer.write_mode == 'wb':
+        fhandler = fhandler.buffer
+    serializer.dump(fhandler, mirs)
 
 
 def _get_serializer(serializer, **kwargs):

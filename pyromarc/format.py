@@ -10,6 +10,9 @@ class MARCSerializer(object):
     """
     """
 
+    read_mode = 'r'
+    write_mode = 'w'
+
     def load(self, buffer):
         raise NotImplementedError()
 
@@ -37,6 +40,9 @@ class MARCSerializer(object):
 class ISO2709(MARCSerializer):
     """ ISO2709 format
     """
+
+    read_mode = 'rb'
+    write_mode = 'wb'
 
     def __init__(self, end_of_record=b'\x1d', end_of_field=b'\x1e',
             end_of_subfield=b'\x1f', chunk_size=1024, encoding='mab2'):
@@ -117,6 +123,9 @@ class ISO2709(MARCSerializer):
 class MsgPack(MARCSerializer):
     """ msgpack format
     """
+
+    read_mode = 'rb'
+    write_mode = 'wb'
 
     def load(self, buffer):
         return self._deserialize(msgpack.Unpacker, buffer, encoding='utf-8')
