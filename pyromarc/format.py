@@ -123,7 +123,7 @@ class MsgPack(MARCSerializer):
 
     def dump(self, buffer, mirs):
         for mir in mirs:
-            buffer.write(packb(mir, use_bin_type=True))
+            buffer.write(msgpack.packb(mir, use_bin_type=True))
 
 
 class Json(MARCSerializer):
