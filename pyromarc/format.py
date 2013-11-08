@@ -1,5 +1,7 @@
 import re
 import smc.bibencodings
+import json
+import msgpack
 from .utils import chunkify
 from .mir import MIR, Field, SubField
 
@@ -8,8 +10,25 @@ class MARCSerializer(object):
     """
     """
 
-    def load(self, buffer, **kwargs):
+    def load(self, buffer):
         raise NotImplementedError()
+
+    def _deserialize(self, callable, *args, **kwargs):
+        for record in callable(*args, **kwargs):
+            fields = []
+            for field in record[1:]:
+                if isinstance(field[1], list):
+                    subfields = [SubField(name, value) for name, value
+                            in field[1]]
+                    fields.append(Field(field[0], subfields=subfields,
+                        indicators=field[2]))
+                else:
+                    fields.append(Field(field[0], value=field[1]))
+            yield MIR(record[0], fields)
+
+    def _serialize(self, records, buffer, callable, *args, **kwargs):
+        for record in records:
+            buffer.write(callable(record, *args, **kwargs))
 
     def dump(self, buffer, mirs):
         raise NotImplementedError()
@@ -99,26 +118,26 @@ class MsgPack(MARCSerializer):
     """ msgpack format
     """
 
-    def load(self, buffer, **kwargs):
-        from msgpack import Unpacker
-
-        for record in Unpacker(buffer, encoding='utf-8'):
-            fields = []
-            for field in record[1:]:
-                if isinstance(field[1], list):
-                    subfields = [SubField(name, value) for name, value
-                            in field[1]]
-                    fields.append(Field(field[0], subfields=subfields,
-                        indicators=field[2]))
-                else:
-                    fields.append(Field(field[0], value=field[1]))
-            yield MIR(record[0], fields)
-
+    def load(self, buffer):
+        return self._deserialize(msgpack.Unpacker, buffer, encoding='utf-8')
 
     def dump(self, buffer, mirs):
-        from msgpack import packb
         for mir in mirs:
             buffer.write(packb(mir, use_bin_type=True))
+
+
+class Json(MARCSerializer):
+    """ json format
+    """
+
+    def __init__(self, indent=None):
+        self.indent = indent
+
+    def load(self, buffer):
+        return self._deserialize(json.load, buffer)
+
+    def dump(self, buffer, mirs):
+        buffer.write(json.dumps(mirs, indent=self.indent))
 
 
 class BadHeaderException(Exception):
