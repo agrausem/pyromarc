@@ -28,7 +28,7 @@ class TestSerializerFactory(unittest.TestCase):
 
     def test_bad_from_string(self):
         with self.assertRaises(format_.UnrecognizedFormat) as cm:
-            serializer = _get_serializer('MARCXML')
+            _get_serializer('MARCXML')
 
         error = cm.exception
         self.assertEqual(str(error), "'MARCXML' is not a valid format.")
@@ -37,7 +37,7 @@ class TestSerializerFactory(unittest.TestCase):
         from json import JSONDecoder
 
         with self.assertRaises(format_.UnrecognizedFormat) as cm:
-            serializer = _get_serializer(JSONDecoder)
+            _get_serializer(JSONDecoder)
 
         error = cm.exception
         self.assertEqual(str(error), "<class 'json.decoder.JSONDecoder'> is "
