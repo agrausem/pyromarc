@@ -70,7 +70,7 @@ def writerb(fhandler, mirs, serializer, **serializer_kwargs):
     if serializer.binary_mode:
         fhandler = fhandler.buffer if not 'b' in fhandler.mode  else fhandler
     elif 'b' in fhandler.mode:
-        raise format_.BadIOMode(serializer, serializer)
+        raise format_.BadIOMode(serializer, fhandler.mode)
     serializer.dump(fhandler, mirs)
 
 

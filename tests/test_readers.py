@@ -1,5 +1,4 @@
 from itertools import islice
-import io
 import os
 import unittest
 from pyromarc import reader, readerb
