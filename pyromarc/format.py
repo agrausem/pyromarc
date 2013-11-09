@@ -10,8 +10,7 @@ class MARCSerializer(object):
     """
     """
 
-    read_mode = 'r'
-    write_mode = 'w'
+    binary_mode = False
 
     def load(self, buffer):
         raise NotImplementedError()
@@ -41,8 +40,7 @@ class ISO2709(MARCSerializer):
     """ ISO2709 format
     """
 
-    read_mode = 'rb'
-    write_mode = 'wb'
+    binary_mode = True
 
     def __init__(self, end_of_record=b'\x1d', end_of_field=b'\x1e',
             end_of_subfield=b'\x1f', chunk_size=1024, encoding='mab2'):
@@ -124,9 +122,8 @@ class MsgPack(MARCSerializer):
     """ msgpack format
     """
 
-    read_mode = 'rb'
-    write_mode = 'wb'
-
+    binary_mode = True
+    
     def load(self, buffer):
         return self._deserialize(msgpack.Unpacker, buffer, encoding='utf-8')
 
@@ -171,3 +168,16 @@ class UnrecognizedFormat(Exception):
 
     def __str__(self):
         return '{} is not a valid format.'.format(self.serializer)
+
+
+class BadIOMode(Exception):
+    """ File handler has a bad opening mode
+    """
+
+    def __init__(self, serializer, open_mode, *args, **kwargs):
+        super(BadIOMode, self).__init__(*args, **kwargs)
+        self.serializer = serializer.__class__.__name__
+        self.open_mode = open_mode
+
+    def __str__(self):
+        return 'Bad opening mode {0.open_mode} for {0.serializer}'.format(self)

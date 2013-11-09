@@ -5,30 +5,72 @@ from pyromarc import format as format_
 
 
 def reader(filepath, serializer, **serializer_kwargs):
+    """ Read records from a filepath given a serializer
+
+    :param filepath: path to the file containing records
+    :type filepath: string
+    :param serializer: the serializer to deserialize records
+    :type serializer: see :py:func:"~pyromarc._get_serializer"
+    :return: :py:class:~pyromarc.mir.MIR objects
+    :rtype: generator
+    """
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    with open(filepath, serializer.read_mode) as fhandler:
+    read_mode = 'rb+' if serializer.binary_mode else 'r+' 
+    with open(filepath, read_mode) as fhandler:
         for element in serializer.load(fhandler):
             yield element
 
 
 def readerb(fhandler, serializer, **serializer_kwargs):
+    """ Read records from a file handler given a serializer
+
+    :param fhandler: a file handler
+    :type fhandler: ~io.BufferedReader or ~io.TextWrapperReader
+    :param serializer: the serializer to deserialize records
+    :type serializer: see :py:func:"~pyromarc._get_serializer"
+    :return: :py:class:~pyromarc.mir.MIR objects
+    :rtype: generator
+    """
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    if serializer.read_mode == 'rb':
-        fhandler = fhandler.buffer
+    if serializer.binary_mode:
+        fhandler = fhandler.buffer if not 'b' in fhandler.mode  else fhandler
+    elif 'b' in fhandler.mode:
+        raise format_.BadIOMode(serializer, fhandler.mode)
     for element in serializer.load(fhandler):
         yield element
 
 
 def writer(filepath, mirs, serializer, **serializer_kwargs):
+    """ Write records to a filepath given a serializer
+
+    :param filepath: path to the file to write records
+    :type filepath: string
+    :param serializer: the serializer to serialize records
+    :type serializer: see :py:func:"~pyromarc._get_serializer"
+    :return: :py:class:~pyromarc.mir.MIR objects
+    :rtype: generator
+    """
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    with open(filepath, serializer.write_mode) as fhandler:
+    write_mode = 'w+b' if serializer.binary_mode else 'w+' 
+    with open(filepath, write_mode) as fhandler:
         serializer.dump(fhandler, mirs)
 
 
 def writerb(fhandler, mirs, serializer, **serializer_kwargs):
+    """ Write records to a file handler given a serializer
+
+    :param fhandler: file handler to write records
+    :type fhandler: ~io.BufferedWriter or ~io.TextWrapperWriter
+    :param serializer: the serializer to serialize records
+    :type serializer: see :py:func:"~pyromarc._get_serializer"
+    :return: :py:class:~pyromarc.mir.MIR objects
+    :rtype: generator
+    """
     serializer = _get_serializer(serializer, **serializer_kwargs)
-    if serializer.write_mode == 'wb':
-        fhandler = fhandler.buffer
+    if serializer.binary_mode:
+        fhandler = fhandler.buffer if not 'b' in fhandler.mode  else fhandler
+    elif 'b' in fhandler.mode:
+        raise format_.BadIOMode(serializer, serializer)
     serializer.dump(fhandler, mirs)
 
 
