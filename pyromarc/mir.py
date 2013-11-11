@@ -79,9 +79,6 @@ class Field(BaseField):
     def is_control(self):
         return not isinstance(self[1], list) and len(self) == 2
 
-    def has_subfields(self):
-        return isinstance(self[1], list)
-
     @property
     def subfields(self):
         if not self.is_control():
