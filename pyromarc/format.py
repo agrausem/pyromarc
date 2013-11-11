@@ -28,10 +28,6 @@ class MARCSerializer(object):
                     fields.append(Field(field[0], value=field[1]))
             yield MIR(record[0], fields)
 
-    def _serialize(self, records, buffer, callable, *args, **kwargs):
-        for record in records:
-            buffer.write(callable(record, *args, **kwargs))
-
     def dump(self, buffer, mirs):
         raise NotImplementedError()
 
