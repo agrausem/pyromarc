@@ -69,31 +69,27 @@ class Field(BaseField):
 
     @property
     def value(self):
-        if not self.has_subfields():
+        if self.is_control():
             return self[1]
-        return None
 
     @property
     def indicators(self):
         return self[2] if not self.is_control() else None
 
     def is_control(self):
-        return not self.has_subfields() and len(self) == 2
+        return not isinstance(self[1], list) and len(self) == 2
 
     def has_subfields(self):
         return isinstance(self[1], list)
 
     @property
     def subfields(self):
-        if self.has_subfields():
+        if not self.is_control():
             return self[1]
-        return None
 
     def subfield(self, tag):
-        try:
+        if self.subfields:
             return self.subfields[self.subfields.index(tag)]
-        except IndexError:
-            return None
 
 
 class SubField(BaseField):
