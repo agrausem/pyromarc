@@ -16,17 +16,8 @@ class MARCSerializer(object):
         raise NotImplementedError()
 
     def _deserialize(self, callable, *args, **kwargs):
-        for record in callable(*args, **kwargs):
-            fields = []
-            for field in record[1:]:
-                if isinstance(field[1], list):
-                    subfields = [SubField(name, value) for name, value
-                            in field[1]]
-                    fields.append(Field(field[0], subfields=subfields,
-                        indicators=field[2]))
-                else:
-                    fields.append(Field(field[0], value=field[1]))
-            yield MIR(record[0], fields)
+        for leader, *fields in callable(*args, **kwargs):
+            yield MIR(leader, fields)
 
     def dump(self, buffer, mirs):
         raise NotImplementedError()
