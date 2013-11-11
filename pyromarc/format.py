@@ -101,8 +101,7 @@ class ISO2709(MARCSerializer):
     def dump(self, buffer, mirs):
         field_format = lambda field: '{0.tag}{0.value}'.format(field)
         for mir in mirs:
-            header = mir.leader
-            header += ''.join('{:.<12}'.format(tag) for tag in mir.tags)
+            header = self._format_header(mir)
             self._write(buffer, header)
             self._write(buffer, self.end_of_field)
             for field in mir.fields:
@@ -116,6 +115,27 @@ class ISO2709(MARCSerializer):
                     self._write(buffer, subfield)
                 self._write(buffer, self.end_of_field)
             self._write(buffer, self.end_of_record)
+
+    def _format_header(self, mir):
+        length_format = lambda field_length: '{:0<4}'.format(field_length)
+        address_format = lambda position: '{:0<5}'.format(position)
+        position = 0    
+        header = mir.leader
+
+        for field in mir.fields:
+            header += field.tag
+            if field.is_control():
+                field_length = len(field.value) + 1
+            else:
+                lindicators = len(field.indicators)
+                lsubfields = sum([len(sub.tag) + len(sub.value) for sub in
+                    field.subfields])
+                field_length = lindicators + lsubfields + 1
+            header += length_format(field_length)
+            header += address_format(position)
+            position += field_length
+
+        return header
 
 
 class MsgPack(MARCSerializer):
