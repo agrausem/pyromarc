@@ -13,15 +13,79 @@ tableau de tableaux) de données bibliographiques cataloguée en MARC. elle
 permet d'établir des ponts simples entre les différents outils exitants de
 traitement, sérialisation, indexation, ...
 
-https://github.com/eiro/p5-marc-mir
-https://github.com/eiro/p5-marc-mir-template
-https://metacpan.org/module/MARCC/marc-mir-0.4/lib/MARC/MIR.pod
+Install
+=======
 
-Pyromarc se veut être une implementation python du pendant Perl. Objectifs du
-sprint de la pycon 2013:
+Pyromarc is only working under *Python 3.2* for the moment. To install the module, use pip :: 
 
-* serialisation/désérialisation ISO2709
-* implementation d'un DSL pythonic permettant de manipuler les enregistrements
-  avec la même simplicité que l'implémentation Perl
-* implementation de MARC::MIR::Template
-* serialisation/désérialisation msgpack
+    $> pip install pyromarc
+
+
+Reading
+=======
+
+ISO2709
+-------
+
+Load MIRs from ISO2709 ::
+
+    from pyromarc import reader
+
+    mirs = reader('/path/to/records.iso2709', 'ISO2709')
+    for mir in mirs:
+        do_something_with(mir)
+
+Or, with a filehandler ::
+
+    from pyromarc import readerb
+
+    with open('/path/to/records/example.iso2709', 'rb') as filehandler:
+        mirs = readerb(filehandler, 'ISO2709')
+        for mir in mirs:
+            do_something_with(mir)
+
+
+Msgpack
+-------
+
+Load MIRs from stdin ::
+
+    import sys
+    from pyromarc import readerb
+
+    mirs = readerb(sys.stdin, 'MsgPack')
+    for mir in mirs:
+        do_something_with(mir)
+
+
+Writing
+=======
+
+ISO2709
+-------
+
+Write MIRs in file ::
+
+    from pyromarc import writer
+
+    [...]
+    writer('/path/to/records.iso2709', mirs, 'ISO2709')
+
+Writing ISO2709 records in JSON ::
+
+    from pyromarc import reader, writer
+
+    mirs = reader('/path/to/records.iso2709', 'ISO2709')
+    writer('/path/to/records.json', mirs, 'Json')
+
+
+MsgPack
+-------
+
+Writing on stdout ::
+
+    import sys
+    from pyromarc import writerb
+
+    [...]
+    writerb(sys.stdout, mirs, 'MsgPack')
