@@ -150,7 +150,9 @@ class Json(MARCSerializer):
         return self._deserialize(json.load, buffer)
 
     def dump(self, buffer, mirs):
-        buffer.write(json.dumps(mirs, indent=self.indent))
+        mirs = list(mirs)
+        for chunk in json.JSONEncoder(indent=self.indent).iterencode(mirs):
+            buffer.write(chunk)
 
 
 class BadHeaderException(Exception):
